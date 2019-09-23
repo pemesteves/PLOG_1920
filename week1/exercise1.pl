@@ -25,7 +25,11 @@ parents(X, Dad, Mom) :-
     parent(Mom, X),
     female(Mom).
 
+%a) parents('Michael Scofield', Dad, Mom).
+
 %son(parent_name)
 son(X, Son) :-
     parent(X, Son),
     male(Son).
+
+%b) son('Aldo Burrows', Son).
