@@ -20,10 +20,9 @@ madeItThrough(Participant) :-
 
 pressButton([]) :- fail.
 
-pressButton([Time|List]) :-
-    Time = 120.
+pressButton([120|_]).
 
-pressButton([Time|List]) :-
+pressButton([_|List]) :-
     pressButton(List).
 
 %2
@@ -34,14 +33,14 @@ juriTimes(Participants, JuriMember, Times, Total) :-
 jTimes([], _, []).
 
 jTimes([P|T], JuriMember, Time) :-
-    performance(P, Performance),
+    performance(P, Performance), 
     getValue(Performance, JuriMember, T2),
     jTimes(T, JuriMember, T1),
     append([T2], T1, Time).
     
 getValue([P|_], 1, P).
 
-getValue([P|T], JuriMember, Value):-
+getValue([_|T], JuriMember, Value):-
     NextJuri is JuriMember-1,
     getValue(T, NextJuri, V1),
     Value is V1.
@@ -51,6 +50,33 @@ getTotal([], 0).
 getTotal([T|T1], Total) :-
     getTotal(T1, Tot),
     Total is Tot + T.
+
+%3 
+patientJuri(JuriMember) :-
+    getAllPerformance(ListOfPerformances, []), 
+    juriNotPressedButton(ListOfPerformances, JuriMember, NumPressed), !, 
+    NumPressed >= 2.
+
+juriNotPressedButton([], _, 0).
+
+juriNotPressedButton([FirstPerformance|OtherPerformances], JuriMember, NumPressed) :-
+    juriNotPressedButton(OtherPerformances, JuriMember, NewNumPressed),
+    getValue(FirstPerformance, JuriMember, Result), 
+    (
+        Result = 120,
+        NumPressed is NewNumPressed + 1;
+        NumPressed is NewNumPressed
+    ).
+
+getAllPerformance(ListOfPerformances, ListOfIds) :-
+    (
+        performance(ID, Performance),
+        \+member(ID, ListOfIds), !,
+        append(ListOfIds, [ID], NewListOfIDs), !,
+        getAllPerformance(NewListOfPerformances, NewListOfIDs),
+        append([Performance], NewListOfPerformances, ListOfPerformances); 
+        true
+    ).
 
 %4
 bestParticipant(P1, P2, P) :-
@@ -73,6 +99,31 @@ getMax(P1, P2, Max) :-
 getMax(P1, P2, Max) :-
     P2 > P1,
     Max is P2.
+
+%5
+allPerfs :-
+    getAllPerformance(Performances, IDs), !,
+    printEachPerformance(Performances, IDs).
+
+printEachPerformance([], []).
+
+printEachPerformance([FirstPerformance|OtherPerformances], [FirstID|OtherIDs]) :-
+    participant(FirstID, _, PerformanceName), !,
+    write(FirstID),
+    write(':'),
+    write(PerformanceName), 
+    write(':['),
+    print_list(FirstPerformance), nl, !,
+    printEachPerformance(OtherPerformances, OtherIDs).
+
+print_list([LastElem|[]]) :-
+    write(LastElem),
+    write(']').
+
+print_list([FirstElem|OtherElems]) :-
+    write(FirstElem), 
+    write(','),
+    print_list(OtherElems).
 
 %6
 nSuccessfulParticipants(T) :- %TODO
