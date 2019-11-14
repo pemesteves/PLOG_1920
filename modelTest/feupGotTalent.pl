@@ -1,3 +1,5 @@
+:- use_module(library(lists)).
+
 %participant(Id,Age,Performance)
 participant(1234, 17, 'Pé coxinho').
 participant(3423, 21, 'Programar com os pés').
@@ -102,19 +104,20 @@ getMax(P1, P2, Max) :-
 
 %5
 allPerfs :-
-    getAllPerformance(Performances, IDs), !,
-    printEachPerformance(Performances, IDs).
+    getAllPerformance(Performances, []), !,
+    printEachPerformance(Performances).
 
-printEachPerformance([], []).
+printEachPerformance([]).
 
-printEachPerformance([FirstPerformance|OtherPerformances], [FirstID|OtherIDs]) :-
+printEachPerformance([FirstPerformance|OtherPerformances]) :-
+    performance(FirstID, FirstPerformance),
     participant(FirstID, _, PerformanceName), !,
     write(FirstID),
     write(':'),
     write(PerformanceName), 
     write(':['),
     print_list(FirstPerformance), nl, !,
-    printEachPerformance(OtherPerformances, OtherIDs).
+    printEachPerformance(OtherPerformances).
 
 print_list([LastElem|[]]) :-
     write(LastElem),
@@ -127,5 +130,99 @@ print_list([FirstElem|OtherElems]) :-
 
 %6
 nSuccessfulParticipants(T) :- %TODO
-    setof(X, madeItThrough(X), L),
+    setof(X, successfulParticipant(X), L),
     length(L, T).
+
+successfulParticipant(Participant) :-
+    performance(Participant, Performance),
+    successfulParticipantHelper(Performance).
+
+successfulParticipantHelper([]).
+
+successfulParticipantHelper([120|OtherTimes]) :-
+    successfulParticipantHelper(OtherTimes).
+
+successfulParticipantHelper(_) :- fail.
+
+%7
+juriFans(JuriFansList) :-
+    bagof([Part-JuriList], juriNotPressedButton(Part, JuriList), JuriFansList).
+
+juriNotPressedButton(Participant, JuriList) :-
+    performance(Participant, Performances),
+    JuriMember = 1,
+    juriNotPressedButtonHelper(Performances, JuriMember, JuriList).
+
+juriNotPressedButtonHelper([], _, []).
+
+juriNotPressedButtonHelper([FirstPerformance|OtherPerformances], JuriMember, JuriList) :-
+    NextJuriMember is JuriMember + 1, !,
+    juriNotPressedButtonHelper(OtherPerformances, NextJuriMember, NewJuriList), !,
+    (
+        FirstPerformance = 120,
+        append([JuriMember], NewJuriList, JuriList);
+
+        JuriList = NewJuriList
+    ).
+
+
+%8
+eligibleOutcome(Id,Perf,TT) :-
+    performance(Id,Times),
+    madeItThrough(Id),
+    participant(Id,_,Perf),
+    sumlist(Times,TT).
+
+nextPhase(N, Participants) :-
+    setof(TT-ID-Perf, eligibleOutcome(ID, Perf, TT), ListParticipants),
+    reverse(ListParticipants, NewListParticipants), 
+    (
+        length(NewListParticipants, N),
+        Participants = NewListParticipants;
+
+        length(NewListParticipants, Length),
+        Length > N,
+        getFirstNElem(NewListParticipants, N, Participants)
+    ).
+
+getFirstNElem([FirstPart|_], 1, [FirstPart]).
+
+getFirstNElem([FirstPart|OtherPart], N, List) :-
+    NewN is N - 1,
+    getFirstNElem(OtherPart, NewN, NewList),
+    append([FirstPart], NewList, List).
+
+%9
+predX(Q,[R|Rs],[P|Ps]) :-
+    participant(R,I,P), I=<Q, !,
+    predX(Q,Rs,Ps).
+
+predX(Q,[R|Rs],Ps) :-
+    participant(R,I,_), I>Q,
+    predX(Q,Rs,Ps).
+
+predX(_,[],[]).
+/*
+ Resposta: O predX/3 retorna no terceiro argumento o nome de todas as atuações de pessoas com idade inferior ao primeiro argumento
+ Este cut é verde, uma vez que não influencia o resultado do programa, mas apenas a sua eficiência
+*/
+
+%10
+impoe(X,L) :-
+    length(Mid,X),
+    append(L1,[X|_],L), append(_,[X|Mid],L1).
+/*
+    Resposta: O predicado impoe/2 cria uma lista L que cumpre os requisitos
+*/
+
+%11
+langford(N, L) :-
+    Length is 2*N,
+    length(L, Length),
+    langford_helper(N, L).
+
+langford_helper(0, _) :- !.
+langford_helper(N, L) :-
+    impoe(N, L),
+    Next is N - 1,
+    langford_helper(Next, L).
