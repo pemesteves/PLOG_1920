@@ -1,7 +1,7 @@
 %a
 conta([], 0, 0).
 
-conta([X|Xs], N, Nc) :-
+conta([_|Xs], N, Nc) :-
     N1 is N - 1,
     conta(Xs, N1, Nc1),
     Nc is Nc1 + 1.
