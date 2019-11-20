@@ -21,7 +21,7 @@ flight('TP843', 'LIRF', 'LPPT', 1935, 195, 'TAP').
 flight('FR5483', 'LPPR', 'LEMD', 630, 105, 'RYR').
 flight('FR5484', 'LEMD', 'LPPR', 1935, 105, 'RYR').
 flight('AF1024', 'LFPG', 'LPPT', 940, 155, 'AFR').
-flight('AF1024', 'LPPT', 'LFPG', 1310, 155, 'AFR').
+flight('AF1025', 'LPPT', 'LFPG', 1310, 155, 'AFR').
 
 
 %1
