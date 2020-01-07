@@ -34,25 +34,71 @@ magic4x4(L) :-
     labeling([], L).
 
 %b
-/*magicNxN(N, L) :-
+magicNxN(N, L) :-
     NumElements is N*N,
-    length(L, NumElements), 
+    length(L, N),
+    create_lists(L, N, NumElements), 
+    append(L, Vars),
+    all_distinct(Vars),
+
+    sum_lines(L, Sum),
+    sum_columns(L, N, 1, Sum),
+    sum_diagonals(L, N, Sum),
+    labeling([], Vars).
+
+create_lists([], _, _).
+
+create_lists([L|L1], N, NumElements) :-
+    length(L, N),
     domain(L, 1, NumElements),
-    all_distinct(L),
-    sum_lines(L, [], N, Sum),
-    %sum_columns(L, [], N, Sum),
-    %sum_diagonals(L, [], N, Sum),
-    labeling([], L).
+    create_lists(L1, N, NumElements).
 
-sum_lines([], _, _, _).
+sum_lines([], _).
 
-sum_lines([Elem|OtherElements], List, N, Sum) :-
-    append([Elem], List, NewList),
-    length(NewList, N),
-    sumlist(NewList, NewSum) #= Sum,
-    sum_lines(OtherElements, [], N, Sum).
+sum_lines([L|L1], Sum) :-
+    sum(L, #=, Sum),
+    sum_lines(L1, Sum).
 
-sum_lines([Elem|OtherElements], List, N, Sum) :-
-    append([Elem], List, NewList),
-    \+length(NewList, N),
-    sum_lines(OtherElements, NewList, N, Sum).*/
+sum_columns(L, N, N, Sum) :-
+    length(Column, N),
+    get_column(L, N, Column),
+
+    sum(Column, #=, Sum).
+
+sum_columns(L, N, C, Sum) :-
+    length(Column, N),
+    get_column(L, C, Column),
+
+    sum(Column, #=, Sum),
+
+    NextColumn is C + 1,
+    sum_columns(L, N, NextColumn, Sum).
+
+get_column([], _, []).
+
+get_column([L|L1], NCol, [C|C1]) :-
+    element(NCol, L, C),
+    get_column(L1, NCol, C1).
+
+sum_diagonals(L, N, Sum) :-
+    length(Diagonal1, N),
+    get_diagonal_1(L, 1, Diagonal1),
+    sum(Diagonal1, #=, Sum),
+
+    length(Diagonal2, N),
+    get_diagonal_2(L, N, Diagonal2),
+    sum(Diagonal2, #=, Sum).
+
+get_diagonal_1([], _, []).
+
+get_diagonal_1([L|L1], NCol, [Value|Diagonal1]) :-
+    element(NCol, L, Value),
+    NextCol is NCol + 1,
+    get_diagonal_1(L1, NextCol, Diagonal1).
+    
+get_diagonal_2([], _, []).
+
+get_diagonal_2([L|L1], NCol, [Value|Diagonal2]) :-
+    element(NCol, L, Value),
+    NextCol is NCol - 1,
+    get_diagonal_2(L1, NextCol, Diagonal2).
