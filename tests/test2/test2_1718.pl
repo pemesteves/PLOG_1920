@@ -39,8 +39,8 @@ prog2(N, M, L1, L2) :-
     N1 is N - 1, length(L2, N1),
     domain(L1, 1, M),
     domain(L2, 1, M),
-    all_distinct(L1),
-    all_distinct(L2),
+    append([L1, L2], Vars),
+    all_distinct(Vars),
     check2(L1, L2),
     labeling([], L1).
 
